@@ -36,38 +36,38 @@ typedef NS_ENUM(NSUInteger, MBXOfflineMapDownloaderState) {
 /** @name Observing Changes to the Downloader's State */
 
 /** Notifies the delegate that the offline map downloader's state has changed. This is designed to facilitate user interface updates such as enabling and disabling buttons and network activity indicators.
-*   @param offlineMapDownloader The offline map downloader whose state has changed.
-*   @param state The new state of the downloader. */
+ *   @param offlineMapDownloader The offline map downloader whose state has changed.
+ *   @param state The new state of the downloader. */
 - (void)offlineMapDownloader:(MBXOfflineMapDownloader *)offlineMapDownloader stateChangedTo:(MBXOfflineMapDownloaderState)state;
 
 /** @name Obtaining Information About Download Jobs */
 
 /** Notifies the delegate of the number of resources which will be requested as part of the current offline map download job. This is designed to facilitate a user interface update to show a progress indicator, as well as to enable sanity checks for whether the number of tiles being requested is reasonable.
-*   @param offlineMapDownloader The offline map downloader whose state has changed.
-*   @param totalFilesExpectedToWrite An estimated count of the number of resources that will be downloaded. This is primarily determined from the map region and zoom limits which were used to begin a download job, but it also potentially includes JSON and marker icon resources.
-*
-*   @warning Since the offline map downloader does not impose any arbitrary upper limit on the number of resources which may be requested from the Mapbox APIs, it is possible to request a very large amount of data. You might want to provide your own checks or accounting mechanisms to manage the number of resources that your apps request from the API. */
+ *   @param offlineMapDownloader The offline map downloader whose state has changed.
+ *   @param totalFilesExpectedToWrite An estimated count of the number of resources that will be downloaded. This is primarily determined from the map region and zoom limits which were used to begin a download job, but it also potentially includes JSON and marker icon resources.
+ *
+ *   @warning Since the offline map downloader does not impose any arbitrary upper limit on the number of resources which may be requested from the Mapbox APIs, it is possible to request a very large amount of data. You might want to provide your own checks or accounting mechanisms to manage the number of resources that your apps request from the API. */
 - (void)offlineMapDownloader:(MBXOfflineMapDownloader *)offlineMapDownloader totalFilesExpectedToWrite:(NSUInteger)totalFilesExpectedToWrite;
 
 /** Notifies the delegate of changes to the percentage completion of an offline map download job. This is designed to facilitate updating a progress indicator.
-*   @param offlineMapDownloader The offline map downloader.
-*   @param totalFilesWritten The number of files which have been downloaded and saved to the database on disk.
-*   @param totalFilesExpectedToWrite An estimated count of the number of resources that will be downloaded. This is primarily determined from the map region and zoom limits which were used to begin a download job, but it also potentially includes JSON and marker icon resources. */
+ *   @param offlineMapDownloader The offline map downloader.
+ *   @param totalFilesWritten The number of files which have been downloaded and saved to the database on disk.
+ *   @param totalFilesExpectedToWrite An estimated count of the number of resources that will be downloaded. This is primarily determined from the map region and zoom limits which were used to begin a download job, but it also potentially includes JSON and marker icon resources. */
 - (void)offlineMapDownloader:(MBXOfflineMapDownloader *)offlineMapDownloader totalFilesWritten:(NSUInteger)totalFilesWritten totalFilesExpectedToWrite:(NSUInteger)totalFilesExpectedToWrite;
 
 /** @name Ending Download Jobs */
 
-/** Notifies the delegate that something unexpected, but not necessarily bad, has happened. This is designed to provide an opportunity to recognize potential configuration problems with your map. For example, you might receive an HTTP 404 response for a map tile if you request a map region which extends outside of your map data's coverage area. 
-*   @param offlineMapDownloader The offline map downloader. 
-*   @param error The error encountered. */
+/** Notifies the delegate that something unexpected, but not necessarily bad, has happened. This is designed to provide an opportunity to recognize potential configuration problems with your map. For example, you might receive an HTTP 404 response for a map tile if you request a map region which extends outside of your map data's coverage area.
+ *   @param offlineMapDownloader The offline map downloader.
+ *   @param error The error encountered. */
 - (void)offlineMapDownloader:(MBXOfflineMapDownloader *)offlineMapDownloader didEncounterRecoverableError:(NSError *)error;
 
 /** Notifies the delegate that an offline map download job has finished.
-*
-*   If the error parameter is `nil`, the job completed successfully. Otherwise, a non-recoverable error was encountered. 
-*   @param offlineMapDownloader The offline map downloader which finished a job.
-*   @param offlineMapDatabase An offline map database which you can use to create an `MBXRasterTileOverlay`. This paramtere may be `nil` if there was an error.
-*   @param error The error which stopped the offline map download job. For successful completion, this parameter will be `nil`. */
+ *
+ *   If the error parameter is `nil`, the job completed successfully. Otherwise, a non-recoverable error was encountered.
+ *   @param offlineMapDownloader The offline map downloader which finished a job.
+ *   @param offlineMapDatabase An offline map database which you can use to create an `MBXRasterTileOverlay`. This paramtere may be `nil` if there was an error.
+ *   @param error The error which stopped the offline map download job. For successful completion, this parameter will be `nil`. */
 - (void)offlineMapDownloader:(MBXOfflineMapDownloader *)offlineMapDownloader didCompleteOfflineMapDatabase:(MBXOfflineMapDatabase *)offlineMapDatabase withError:(NSError *)error;
 
 @end
@@ -76,8 +76,8 @@ typedef NS_ENUM(NSUInteger, MBXOfflineMapDownloaderState) {
 #pragma mark -
 
 /** `MBXOfflineMapDownloader` is a class for managing the downloading of offline maps.
-*
-*   A single, shared instance of `MBXOfflineMapDownloader` exists and should be accessed with the `sharedOfflineMapDownloader` class method. */
+ *
+ *   A single, shared instance of `MBXOfflineMapDownloader` exists and should be accessed with the `sharedOfflineMapDownloader` class method. */
 @interface MBXOfflineMapDownloader : NSObject
 
 
@@ -139,33 +139,33 @@ typedef NS_ENUM(NSUInteger, MBXOfflineMapDownloaderState) {
 /** @name Managing Active Download Jobs */
 
 /** Begins an offline map download job including metadata and markers using the default (full) image quality.
-*   @param mapID The map ID from which to download offline map data.
-*   @param mapRegion The region of the map for which to download tiles.
-*   @param minimumZ The minimum zoom level for which to download tiles.
-*   @param maximumZ The maximum zoom level for which to download tiles. 
-*
-*   @warning It is recommended to check the return value of the offlineMapDownloader:totalFilesExpectedToWrite: delegate method to ensure that an unexpectedly large number of resources aren't going to be loaded. Map tile counts increase exponentially with increasing zoom level. */
+ *   @param mapID The map ID from which to download offline map data.
+ *   @param mapRegion The region of the map for which to download tiles.
+ *   @param minimumZ The minimum zoom level for which to download tiles.
+ *   @param maximumZ The maximum zoom level for which to download tiles.
+ *
+ *   @warning It is recommended to check the return value of the offlineMapDownloader:totalFilesExpectedToWrite: delegate method to ensure that an unexpectedly large number of resources aren't going to be loaded. Map tile counts increase exponentially with increasing zoom level. */
 - (void)beginDownloadingMapID:(NSString *)mapID mapRegion:(MKCoordinateRegion)mapRegion minimumZ:(NSInteger)minimumZ maximumZ:(NSInteger)maximumZ;
 
 /** Begins an offline map download job using the default (full) image quality.
-*   @param mapID The map ID from which to download offline map data.
-*   @param mapRegion The region of the map for which to download tiles.
-*   @param minimumZ The minimum zoom level for which to download tiles.
-*   @param maximumZ The maximum zoom level for which to download tiles.
-*   @param includeMetadata Whether to include the map's metadata (for values such as the initial center point and zoom) in the offline map.
-*   @param includeMarkers Whether to include the map's marker image resources in the offline map.
-*
-*   @warning It is recommended to check the return value of the offlineMapDownloader:totalFilesExpectedToWrite: delegate method to ensure that an unexpectedly large number of resources aren't going to be loaded. Map tile counts increase exponentially with increasing zoom level. */
+ *   @param mapID The map ID from which to download offline map data.
+ *   @param mapRegion The region of the map for which to download tiles.
+ *   @param minimumZ The minimum zoom level for which to download tiles.
+ *   @param maximumZ The maximum zoom level for which to download tiles.
+ *   @param includeMetadata Whether to include the map's metadata (for values such as the initial center point and zoom) in the offline map.
+ *   @param includeMarkers Whether to include the map's marker image resources in the offline map.
+ *
+ *   @warning It is recommended to check the return value of the offlineMapDownloader:totalFilesExpectedToWrite: delegate method to ensure that an unexpectedly large number of resources aren't going to be loaded. Map tile counts increase exponentially with increasing zoom level. */
 - (void)beginDownloadingMapID:(NSString *)mapID mapRegion:(MKCoordinateRegion)mapRegion minimumZ:(NSInteger)minimumZ maximumZ:(NSInteger)maximumZ includeMetadata:(BOOL)includeMetadata includeMarkers:(BOOL)includeMarkers;
 
 /** Begins an offline map download job.
-*   @param mapID The map ID from which to download offline map data.
-*   @param mapRegion The region of the map for which to download tiles.
-*   @param minimumZ The minimum zoom level for which to download tiles.
-*   @param maximumZ The maximum zoom level for which to download tiles.
-*   @param includeMetadata Whether to include the map's metadata (for values such as the initial center point and zoom) in the offline map.
-*   @param includeMarkers Whether to include the map's marker image resources in the offline map.
-*   @param imageQuality The image quality to when requesting tiles. */
+ *   @param mapID The map ID from which to download offline map data.
+ *   @param mapRegion The region of the map for which to download tiles.
+ *   @param minimumZ The minimum zoom level for which to download tiles.
+ *   @param maximumZ The maximum zoom level for which to download tiles.
+ *   @param includeMetadata Whether to include the map's metadata (for values such as the initial center point and zoom) in the offline map.
+ *   @param includeMarkers Whether to include the map's marker image resources in the offline map.
+ *   @param imageQuality The image quality to when requesting tiles. */
 - (void)beginDownloadingMapID:(NSString *)mapID mapRegion:(MKCoordinateRegion)mapRegion minimumZ:(NSInteger)minimumZ maximumZ:(NSInteger)maximumZ includeMetadata:(BOOL)includeMetadata includeMarkers:(BOOL)includeMarkers imageQuality:(MBXRasterImageQuality)imageQuality;
 
 // Custom Map Downloader
@@ -183,11 +183,11 @@ typedef NS_ENUM(NSUInteger, MBXOfflineMapDownloaderState) {
 /** @name Removing Offline Maps */
 
 /** Invalidates a given offline map and removes its associated backing database on disk. This is designed for managing the disk storage consumed by offline maps.
-*   @param offlineMapDatabase The offline map database to invalidate. */
+ *   @param offlineMapDatabase The offline map database to invalidate. */
 - (void)removeOfflineMapDatabase:(MBXOfflineMapDatabase *)offlineMapDatabase;
 
 /** Invalidates the offline map with the given unique identifier and removes its associated backing database on disk. This is designed for managing the disk storage consumed by offline maps.
-*   @param uniqueID The unique ID of the map database to invalidate. */
+ *   @param uniqueID The unique ID of the map database to invalidate. */
 - (void)removeOfflineMapDatabaseWithID:(NSString *)uniqueID;
 
 @end
