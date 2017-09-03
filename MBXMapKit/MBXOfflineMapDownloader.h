@@ -168,6 +168,9 @@ typedef NS_ENUM(NSUInteger, MBXOfflineMapDownloaderState) {
 *   @param imageQuality The image quality to when requesting tiles. */
 - (void)beginDownloadingMapID:(NSString *)mapID mapRegion:(MKCoordinateRegion)mapRegion minimumZ:(NSInteger)minimumZ maximumZ:(NSInteger)maximumZ includeMetadata:(BOOL)includeMetadata includeMarkers:(BOOL)includeMarkers imageQuality:(MBXRasterImageQuality)imageQuality;
 
+// Custom Map Downloader
+- (void)beginDownloadingMapFromUrl:(NSString *)url mapRegion:(MKCoordinateRegion)mapRegion minimumZ:(NSInteger)minimumZ maximumZ:(NSInteger)maximumZ;
+
 /** Cancels the current offline map download job and discards any associated resources. */
 - (void)cancel;
 
