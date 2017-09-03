@@ -984,6 +984,89 @@
     }];
 }
 
+#pragma Own Tile Sources
+- (void)beginDownloadingMapFromUrl:(NSString *)url mapRegion:(MKCoordinateRegion)mapRegion minimumZ:(NSInteger)minimumZ maximumZ:(NSInteger)maximumZ
+{
+    assert(_state == MBXOfflineMapDownloaderStateAvailable);
+    
+    [self setUpNewDataSession];
+    
+    [_backgroundWorkQueue addOperationWithBlock:^{
+        
+        // Start a download job to retrieve all the resources needed for using the specified map offline
+        //
+        _uniqueID = [[NSUUID UUID] UUIDString];
+        _mapID = @"Custom";
+        _includesMetadata = YES;
+        _includesMarkers = YES;
+        _imageQuality = MBXRasterImageQualityFull;
+        _mapRegion = mapRegion;
+        _minimumZ = minimumZ;
+        _maximumZ = maximumZ;
+        _state = MBXOfflineMapDownloaderStateRunning;
+        [self notifyDelegateOfStateChange];
+        
+        NSDictionary *metadataDictionary =
+        @{
+          @"uniqueID": _uniqueID,
+          @"mapID": _mapID,
+          @"includesMetadata" : @"YES",
+          @"includesMarkers" : @"YES",
+          @"imageQuality" : [NSString stringWithFormat:@"%ld", (long)_imageQuality],
+          @"region_latitude" : [NSString stringWithFormat:@"%.8f",mapRegion.center.latitude],
+          @"region_longitude" : [NSString stringWithFormat:@"%.8f",mapRegion.center.longitude],
+          @"region_latitude_delta" : [NSString stringWithFormat:@"%.8f",mapRegion.span.latitudeDelta],
+          @"region_longitude_delta" : [NSString stringWithFormat:@"%.8f",mapRegion.span.longitudeDelta],
+          @"minimumZ" : [NSString stringWithFormat:@"%ld",(long)minimumZ],
+          @"maximumZ" : [NSString stringWithFormat:@"%ld",(long)maximumZ]
+          };
+        
+        NSMutableArray *urls = [[NSMutableArray alloc] init];
+        
+        // Loop through the zoom levels and lat/lon bounds to generate a list of urls which should be included in the offline map
+        //
+        CLLocationDegrees minLat = mapRegion.center.latitude - (mapRegion.span.latitudeDelta / 2.0);
+        CLLocationDegrees maxLat = minLat + mapRegion.span.latitudeDelta;
+        CLLocationDegrees minLon = mapRegion.center.longitude - (mapRegion.span.longitudeDelta / 2.0);
+        CLLocationDegrees maxLon = minLon + mapRegion.span.longitudeDelta;
+        NSUInteger minX;
+        NSUInteger maxX;
+        NSUInteger minY;
+        NSUInteger maxY;
+        NSUInteger tilesPerSide;
+        for(NSUInteger zoom = minimumZ; zoom <= maximumZ; zoom++)
+        {
+            tilesPerSide = pow(2.0, zoom);
+            minX = floor(((minLon + 180.0) / 360.0) * tilesPerSide);
+            maxX = floor(((maxLon + 180.0) / 360.0) * tilesPerSide);
+            minY = floor((1.0 - (logf(tanf(maxLat * M_PI / 180.0) + 1.0 / cosf(maxLat * M_PI / 180.0)) / M_PI)) / 2.0 * tilesPerSide);
+            maxY = floor((1.0 - (logf(tanf(minLat * M_PI / 180.0) + 1.0 / cosf(minLat * M_PI / 180.0)) / M_PI)) / 2.0 * tilesPerSide);
+            for(NSUInteger x=minX; x<=maxX; x++)
+            {
+                for(NSUInteger y=minY; y<=maxY; y++)
+                {
+                    [urls addObject:[NSString stringWithFormat:url, (long)zoom, (long)x, (long)y ]];
+                }
+            }
+        }
+        
+        // There aren't any marker icons to worry about, so just create database and start downloading
+        //
+        NSError *error;
+        [self sqliteCreateDatabaseUsingMetadata:metadataDictionary urlArray:urls withError:&error];
+        if(error)
+        {
+            [self cancelImmediatelyWithError:error];
+        }
+        else
+        {
+            [self notifyDelegateOfInitialCount];
+            [self startDownloading];
+        }
+        
+    }];
+}
+
 
 - (NSArray *)parseMarkerIconURLStringsFromGeojsonData:(NSData *)data
 {
